@@ -42,25 +42,28 @@ function getCurrentDateFormatted() {
 }
 
 
-app.get('/api/:date', (req, res) => {
-  const inputDate = req.params.date;
+app.get('/api/:date?', (req, res) => {
+  let inputDate = req.params.date;
   
-  // Parse the input date
-  const parsedDate = new Date(inputDate);
-  
-  // Check if the parsed date is valid
-  if (isNaN(parsedDate.getTime())) {
-      return res.status(400).json({ error: 'Invalid date format' });
+  // Check if the date parameter is empty
+  if (!inputDate) {
+    inputDate = new Date(); // Set it to the current time
+  } else {
+    // Parse the input date
+    inputDate = new Date(inputDate);
+    
+    // Check if the parsed date is valid
+    if (isNaN(inputDate.getTime())) {
+      return res.status(400).json({ error: 'Invalid Date' });
+    }
   }
 
-  // Convert the date to Unix timestamp in milliseconds
-  const unixTimestamp = parsedDate.getTime();
+  // Format the date to the required UTC format
+  const utcFormattedDate = inputDate.toUTCString();
 
   // Send the response
-  res.json({ unix: unixTimestamp , utc: getCurrentDateFormatted()});
+  res.json({ unix: inputDate.getTime(), utc: utcFormattedDate });
 });
-
-
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
