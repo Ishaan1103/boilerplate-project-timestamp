@@ -25,6 +25,41 @@ app.get("/api/hello", function (req, res) {
 });
 
 
+function getCurrentDateFormatted() {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  const currentDate = new Date();
+  const dayOfWeek = days[currentDate.getUTCDay()];
+  const dayOfMonth = currentDate.getUTCDate();
+  const month = months[currentDate.getUTCMonth()];
+  const year = currentDate.getUTCFullYear();
+  const hours = currentDate.getUTCHours().toString().padStart(2, '0');
+  const minutes = currentDate.getUTCMinutes().toString().padStart(2, '0');
+  const seconds = currentDate.getUTCSeconds().toString().padStart(2, '0');
+
+  return `${dayOfWeek}, ${dayOfMonth} ${month} ${year} ${hours}:${minutes}:${seconds} GMT`;
+}
+
+
+app.get('/api/:date', (req, res) => {
+  const inputDate = req.params.date;
+  
+  // Parse the input date
+  const parsedDate = new Date(inputDate);
+  
+  // Check if the parsed date is valid
+  if (isNaN(parsedDate.getTime())) {
+      return res.status(400).json({ error: 'Invalid date format' });
+  }
+
+  // Convert the date to Unix timestamp in milliseconds
+  const unixTimestamp = parsedDate.getTime();
+
+  // Send the response
+  res.json({ unix: unixTimestamp , utc: getCurrentDateFormatted()});
+});
+
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
